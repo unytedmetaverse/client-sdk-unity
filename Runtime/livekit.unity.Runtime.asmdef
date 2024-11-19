@@ -2,7 +2,10 @@
     "name": "LiveKit",
     "rootNamespace": "LiveKit",
     "references": [],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Android",
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": true,
     "overrideReferences": false,
