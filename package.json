@@ -1,19 +1,8 @@
 {
-  "name": "io.livekit.livekit-sdk",
+  "name": "com.unyted.client-sdk",
   "version": "1.0.1",
-  "displayName": "LiveKit SDK",
-  "description": "LiveKit",
-  "unity": "2021.3",
-  "author": {
-    "name": "Th\u00e9o Monnom",
-    "email": "theo.monnom@outlook.com"
-  },
-  "samples": [
-    {
-      "displayName": "Example",
-      "description": "LiveKit sample",
-      "path": "Samples~"
-    }
-  ],
-  "type": "library"
+  "displayName": "Unyted LiveKit Client SDK",
+  "description": "LiveKit Client SDK for Unyted Metaverse",
+  "unity": "2022.3",
+  "dependencies": {}
 }
