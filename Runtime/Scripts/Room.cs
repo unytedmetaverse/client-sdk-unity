@@ -171,6 +171,7 @@ namespace LiveKit
         {
             if (this.RoomHandle == null)
                 return;
+            _participants.Clear();
             using var response = FFIBridge.Instance.SendDisconnectRequest(this);
             Utils.Debug($"Disconnect.... {RoomHandle}");
             FfiResponse resp = response;
@@ -248,7 +249,10 @@ namespace LiveKit
                     {
                         var participant = RemoteParticipants[e.TrackPublished.ParticipantIdentity];
                         var publication = new RemoteTrackPublication(e.TrackPublished.Publication.Info, FfiHandle.FromOwnedHandle(e.TrackPublished.Publication.Handle));
-                        participant._tracks.Add(publication.Sid, publication);
+                        if (participant._tracks.ContainsKey(publication.Sid))
+                            participant._tracks[publication.Sid] = publication;
+                        else
+                            participant._tracks.Add(publication.Sid, publication);
                         participant.OnTrackPublished(publication);
                         TrackPublished?.Invoke(publication, participant);
                     }
@@ -256,10 +260,12 @@ namespace LiveKit
                 case RoomEvent.MessageOneofCase.TrackUnpublished:
                     {
                         var participant = RemoteParticipants[e.TrackUnpublished.ParticipantIdentity];
-                        var publication = participant.Tracks[e.TrackUnpublished.PublicationSid];
-                        participant._tracks.Remove(publication.Sid);
-                        participant.OnTrackUnpublished(publication);
-                        TrackUnpublished?.Invoke(publication, participant);
+                        if (participant.Tracks.TryGetValue(e.TrackUnpublished.PublicationSid, out var publication))
+                        {
+                            participant._tracks.Remove(publication.Sid);
+                            participant.OnTrackUnpublished(publication);
+                            TrackUnpublished?.Invoke(publication, participant);
+                        }
                     }
                     break;
                 case RoomEvent.MessageOneofCase.TrackSubscribed:
@@ -445,11 +451,18 @@ namespace LiveKit
             var participant = item.Participant;
             var publications = item.Publications;
             var newParticipant = new RemoteParticipant(participant, this);
-            _participants.Add(participant.Info.Identity, newParticipant);
+            if (_participants.ContainsKey(participant.Info.Identity))
+                _participants[participant.Info.Identity] = newParticipant;
+            else
+                _participants.Add(participant.Info.Identity, newParticipant);
+            
             foreach (var pub in publications)
             {
                 var publication = new RemoteTrackPublication(pub.Info, FfiHandle.FromOwnedHandle(pub.Handle));
-                newParticipant._tracks.Add(publication.Sid, publication);
+                if (newParticipant._tracks.ContainsKey(publication.Sid))
+                    newParticipant._tracks.Add(publication.Sid, publication);
+                else
+                    newParticipant._tracks[publication.Sid] = publication;
                 newParticipant.OnTrackPublished(publication);
             }
             return newParticipant;
@@ -458,7 +471,10 @@ namespace LiveKit
         internal RemoteParticipant CreateRemoteParticipant(OwnedParticipant participant)
         {
             var newParticipant = new RemoteParticipant(participant, this);
-            _participants.Add(participant.Info.Identity, newParticipant);
+            if (_participants.ContainsKey(participant.Info.Identity))
+                _participants[participant.Info.Identity] = newParticipant;
+            else
+                _participants.Add(participant.Info.Identity, newParticipant);
             return newParticipant;
         }
 
