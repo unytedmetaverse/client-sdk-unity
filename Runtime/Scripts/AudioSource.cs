@@ -76,14 +76,14 @@ namespace LiveKit
             UpdateSource(source);
         }
 
-        public void Start()
+        public void Start(string deviceId)
         {
             Stop();
             _readAudioThread = new Thread(Update);
             _readAudioThread.Start();
 
             _audioFilter.AudioRead += OnAudioRead;
-            while (!(Microphone.GetPosition(null) > 0)) { }
+            while (!(Microphone.GetPosition(deviceId) > 0)) { }
             _audioSource.Play();
         }
 
